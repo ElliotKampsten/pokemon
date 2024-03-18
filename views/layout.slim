@@ -6,5 +6,8 @@ html lang="en"
         title Document
     body 
 
-    h1 Layouttext 
+
+    - if session[:id] 
+        a href="/teams/create" Create 
+    end 
     ==yield 

@@ -4,6 +4,8 @@ require 'sqlite3'
 require 'bcrypt'
 require 'sinatra/reloader'
 
+enable :sessions
+
 get('/') do
     slim(:start)
 end
@@ -19,6 +21,10 @@ end
 
 get('/fel') do
     slim(:fel)
+end
+
+get('/teams/create') do
+  slim(:"teams/create")
 end
 
 post('/users/store') do
@@ -63,10 +69,12 @@ post('/users/logincalc') do
     result = db.execute("SELECT * FROM Users WHERE username = ?",username).first
     pwdigest = result["Pwdigest"]
     id = result["id"]
+    name = result["Username"]
   
     
     if BCrypt::Password.new(pwdigest) == password
       session[:id] = id 
+      session[:name] = name
       redirect('/home')
     else
       #redirect('/fel') - fixa felsida
