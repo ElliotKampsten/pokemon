@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 html lang="en"
     head
-        meta charset="UTF-8"/
-        meta name="viewport" content="width=device-width, initial-scale=1.0"/
+        meta charset="UTF-8"
+        meta name="viewport" content="width=device-width, initial-scale=1.0"
         title Document
-    body 
+        link rel="stylesheet" href="/css/style.css"
+    body id="layoutbody"
 
+    div id="navigation"
+        - if session[:id] 
+            div class="navbutton"
+                a class="navlink" href="/pokemons" Pokedex 
+        end 
+         - if session[:id] 
+            div class="navbutton"
+                a class="navlink" href="/pokemons/create" Create  
+        end 
+         - if session[:id] 
+            div class="navbutton"
+                a class="navlink" href="/pokemons/create" Remove 
+        end 
 
-    - if session[:id] 
-        a href="/teams/create" Create 
-    end 
-    ==yield 
+==yield 

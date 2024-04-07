@@ -23,8 +23,8 @@ get('/fel') do
     slim(:fel)
 end
 
-get('/teams/create') do
-  slim(:"teams/create")
+get('/pokemons/create') do
+  slim(:"pokemons/create")
 end
 
 post('/users/store') do
@@ -54,6 +54,40 @@ get('/home') do
     slim(:home)
 end
 
+get('/pokemons') do
+  slim(:"pokemons/index")
+end
+
+post('/pokemons/pokemonaddcalc') do
+
+  #MÅSTE FIXA REDIRECT FÖR NÄR MAN REDAN HAR POKEMONEN
+
+  enteredpokemon = params[:enteredpokemon].capitalize()
+  db = SQLite3::Database.new('db/pokemon.db')
+  db.results_as_hash = true
+  
+  
+  if !db.execute('SELECT * FROM Pokemon WHERE Name == ?',enteredpokemon).first
+    #pokemon was misspelled or invalid
+    redirect("/pokemons/create")
+  end
+
+  pokemon_id = db.execute('SELECT * FROM Pokemon WHERE Name == ?', enteredpokemon).first["id"]
+  user_id = session[:id]
+  
+
+  if db.execute('SELECT * FROM User_Pokemon WHERE User_id == ? AND Pokemon_id == ?',user_id,pokemon_id).first == nil
+    #Does not exist already in users pokdex, the rel-table is empty, add pokemon
+    db.execute("INSERT INTO User_Pokemon (User_id,Pokemon_id) VALUES (?,?)",user_id,pokemon_id)
+    redirect("./home")
+
+  else
+    redirect("/pokemons/create")
+  end
+  
+
+
+end
 
 post('/users/logincalc') do
     username= params[:username]
