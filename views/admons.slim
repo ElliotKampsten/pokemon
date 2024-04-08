@@ -1,0 +1,25 @@
+
+-require 'sqlite3'
+- db = SQLite3::Database.new('db/pokemon.db')
+- db.results_as_hash = true
+- pokemon_ids = db.execute("SELECT * FROM Pokemon")
+h1 This is all the pokemons granted to the admin 
+div id="pokedexgrid"
+    - pokemon_ids.each do |currentid|
+        - currentpokemon = db.execute('SELECT * FROM Pokemon WHERE id == ?',currentid["id"]).first
+        - bgcrgb = [123,205,152]
+        - if currentpokemon["Type1"] == "Fire"
+            - bgcrgb = [255,0,0]
+        end 
+        - if currentpokemon["Type1"] == "Water"
+            - bgcrgb = [0,0,255]
+        end 
+        - if currentpokemon["Type1"] == "Grass"
+            - bgcrgb = [0,255,0]
+        end 
+        div style="background-color: rgb(#{bgcrgb[0]},#{bgcrgb[1]},#{bgcrgb[2]}); width:100px; height:100px;" class="pokemondiv"
+           p #{currentpokemon["Name"]} 
+
+
+
+    

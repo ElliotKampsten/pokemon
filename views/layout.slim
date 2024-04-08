@@ -7,6 +7,15 @@ html lang="en"
         link rel="stylesheet" href="/css/style.css"
     body id="layoutbody"
 
+    - if flash[:success]
+        p.notice.success = flash[:success]
+   
+    - if flash[:error]
+      p.notice.error= flash[:error]
+
+    - if flash[:notice]
+        p.notice = flash[:notice]
+
     div id="navigation"
         - if session[:id] 
             div class="navbutton"
@@ -18,7 +27,17 @@ html lang="en"
         end 
          - if session[:id] 
             div class="navbutton"
-                a class="navlink" href="/pokemons/create" Remove 
+                a class="navlink" href="/pokemons/remove" Remove 
+        end 
+
+        - if session[:id] and session[:is_admin] == true 
+            div class="navbutton"
+                a class="navlink" href="/admons" Admons 
+        end 
+        
+        - if session[:id] 
+            div class="navbutton"
+                a class="navlink" href="/logout" Logout 
         end 
 
 ==yield 
