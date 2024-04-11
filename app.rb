@@ -20,6 +20,11 @@ get('/users/login') do
     slim(:login)
 end
 
+get('/teambuildcheathandler') do
+  flash[:error] = "You have too few pokemons to use this function"
+  redirect('/home')
+end
+
 get('/fel') do
     slim(:fel)
 end
@@ -65,7 +70,7 @@ end
 
 post('/pokemons/pokemonaddcalc') do
 
-  #MÅSTE FIXA REDIRECT FÖR NÄR MAN REDAN HAR POKEMONEN
+  
 
   enteredpokemon = params[:enteredpokemon].capitalize()
   db = SQLite3::Database.new('db/pokemon.db')
@@ -87,7 +92,6 @@ post('/pokemons/pokemonaddcalc') do
     db.execute("INSERT INTO User_Pokemon (User_id,Pokemon_id) VALUES (?,?)",user_id,pokemon_id)
     flash[:success] = "Pokemon was successfully added to your pokedex!"
     redirect("/pokemons/create")
-
   else
     flash[:error] = "Pokemon already exists in your pokedex!"
     redirect("/pokemons/create")
@@ -146,10 +150,70 @@ get('/admons') do
   end
 end
 
+get('/teambuilder') do
+  slim(:"teams/index")
+end
+
+get('/teams/create') do
+  slim(:"teams/create")
+end
+
+post('/teams/teamaddcalc') do
+  db = SQLite3::Database.new('db/pokemon.db')
+  #db.results_as_hash = true
+  if params[:action] == "add"
+    enteredpokemon = params[:enteredpokemon].capitalize()
+    if !db.execute('SELECT * FROM Pokemon WHERE Name == ?',enteredpokemon).first
+      #pokemon was misspelled or invalid
+      flash[:error] = "Pokemon was misspelled or is invalid"
+      redirect("/teams/create")
+    end
+
+    pokemon_id = db.execute('SELECT * FROM Pokemon WHERE Name == ?', enteredpokemon).first["id"]
+    user_id = session[:id]
+
+    #Check if user have pokemon
+    if db.execute('SELECT * FROM User_Pokemon WHERE User_id == ? AND Pokemon_id == ?',user_id,pokemon_id).first == nil
+      #Does not exist in users pokdex, warn
+      flash[:error] = "Pokemon does not exist in your pokedex!"
+      redirect("/teams/create")
+    end
+
+  
+    
+    session[:currentteam_ids] << pokemon_id
+
+    flash[:success] = "Pokemon was added to current team"
+    redirect("/teams/create")
+
+  else
+      teamname = params[:enteredteamname]
+      pokemonname1 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][0]).first
+      pokemonname2 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][1]).first
+      pokemonname3 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][2]).first
+      pokemonname4 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][3]).first
+      pokemonname5 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][4]).first
+      #flash[:success] = "#{pokemonname1}"
+      #redirect('/home')
+      db.execute('INSERT INTO Teams (Name,Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5) VALUES (?,?,?,?,?,?)',teamname,pokemonname1,pokemonname2,pokemonname3,pokemonname4,pokemonname5)
+      session[:currentteam_ids] = []
+      flash[:success] = "Team added"
+      redirect('/teambuilder')
+  end
+  
+end
+
+post('/teams/removehandler') do
+    nummer = params[:number].to_i
+    session[:currentteam_ids].delete_at(nummer)
+    redirect('/teams/create')
+end
+
 post('/users/logincalc') do
     username= params[:username]
     password= params[:password]
     session[:is_admin] = false
+    session[:currentteam_ids] = []
     db = SQLite3::Database.new('db/pokemon.db')
     db.results_as_hash = true
    

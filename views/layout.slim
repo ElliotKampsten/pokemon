@@ -7,6 +7,10 @@ html lang="en"
         link rel="stylesheet" href="/css/style.css"
     body id="layoutbody"
 
+    - if !session[:id] and request.path_info != '/' and request.path_info != '/users/register' and request.path_info != '/users/login'
+        -redirect('/')
+    end 
+
     - if flash[:success]
         p.notice.success = flash[:success]
    
@@ -38,6 +42,16 @@ html lang="en"
         - if session[:id] 
             div class="navbutton"
                 a class="navlink" href="/logout" Logout 
+        end 
+
+        - if session[:id] 
+            - db = SQLite3::Database.new('db/pokemon.db')
+            - db.results_as_hash = true
+            - usermons = db.execute('SELECT * FROM User_Pokemon WHERE User_id == ?',session[:id])
+            - if usermons.count() >= 5 
+                div class="navbutton"
+                     a class="navlink" href="/teambuilder" Teambuilder
+            end 
         end 
 
 ==yield 

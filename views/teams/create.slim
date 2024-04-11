@@ -1,0 +1,49 @@
+-require 'sqlite3'
+- db = SQLite3::Database.new('db/pokemon.db')
+- db.results_as_hash = true
+h1 team creator
+div id="creatediv"
+  - if session[:currentteam_ids].count() < 5
+    h1 id="createtext" Enter the name of the gen 1 pokemon you would like to add to your current team!
+
+  -else 
+      h1 id="createtext" Enter a name for your team!
+
+
+  form action="teamaddcalc" method="POST" onsubmit="return validatePokemonForm()"
+    - if session[:currentteam_ids].count() < 5
+      input id="addpokemonbar" type="text"  name="enteredpokemon" placeholder="Enter pokemon name"
+    -else
+       input id="addpokemonbar" type="text"  name="enteredteamname" placeholder="Enter a team name"
+    - if session[:currentteam_ids].count() < 5
+        button type="submit" name="action" value="add" Add
+    button type="submit" name="action" value="complete" Complete
+
+  h1 Current Team: 
+  div id="currentteamdiv"
+    - session[:currentteam_ids].each_with_index do |currentid,index|
+        - currentpokemon = db.execute('SELECT * FROM Pokemon WHERE id == ?',currentid).first
+        - bgcrgb = [123,205,152]
+        - if currentpokemon["Type1"] == "Fire"
+            - bgcrgb = [255,0,0]
+        end 
+        - if currentpokemon["Type1"] == "Water"
+            - bgcrgb = [0,0,255]
+        end 
+        - if currentpokemon["Type1"] == "Grass"
+            - bgcrgb = [0,255,0]
+        end 
+        div style="background-color: rgb(#{bgcrgb[0]},#{bgcrgb[1]},#{bgcrgb[2]}); width:100px; height:100px;" class="pokemondiv"
+           p #{currentpokemon["Name"]} 
+           form action="removehandler" method="POST"
+            button name="number" value=index type="submit" remove
+      
+        
+  /if current amount of pokemon is 5 we can add complete button and name field
+  /need to have an array with the current pokemons in the team that is currently being built
+
+
+    
+      
+  
+

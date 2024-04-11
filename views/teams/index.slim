@@ -1,0 +1,21 @@
+h1 teambuilder index 
+- db = SQLite3::Database.new('db/pokemon.db')
+- db.results_as_hash = true
+- usermons = db.execute('SELECT * FROM User_Pokemon WHERE User_id == ?',session[:id])
+- if usermons.count() < 5
+    -redirect('teambuildcheathandler')
+end 
+
+div class="builderheader"
+    div class="navbutton" id="buildheadbutton"
+        a class="navlink" href="/teams/create" Create Team 
+
+
+h1 Teams:
+div id="teamgrid"
+    - #db.execute('SELECT * FROM ')
+
+
+
+
+

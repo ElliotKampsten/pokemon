@@ -80,6 +80,7 @@
 
 .pokemondiv{
     display: flex;
+    flex-direction: column;
     width: 100px;
     height: 100px;
     align-items: center;
@@ -135,4 +136,45 @@
     align-items: center;
     border-radius: 8%;
 }
+
+#buildheadbutton{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#buildheadbutton{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.builderheader{
+    display: flex;
+    justify-content: center;
+    margin-bottom: auto;
+    width: 100vw;
+    height: 8vh;
+    
+
+
+}
+
+#teamgrid{
+    display: flex;
+    width: 100vw;
+    height: auto;
+}
+
+#currentteamdiv{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 70vw;
+    height: auto;
+
+}
+
+
 
