@@ -160,7 +160,7 @@ end
 
 post('/teams/teamaddcalc') do
   db = SQLite3::Database.new('db/pokemon.db')
-  #db.results_as_hash = true
+  db.results_as_hash = true
   if params[:action] == "add"
     enteredpokemon = params[:enteredpokemon].capitalize()
     if !db.execute('SELECT * FROM Pokemon WHERE Name == ?',enteredpokemon).first
@@ -193,9 +193,10 @@ post('/teams/teamaddcalc') do
       pokemonname3 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][2]).first
       pokemonname4 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][3]).first
       pokemonname5 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][4]).first
-      #flash[:success] = "#{pokemonname1}"
-      #redirect('/home')
+     
+      db.results_as_hash = false
       db.execute('INSERT INTO Teams (Name,Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5) VALUES (?,?,?,?,?,?)',teamname,pokemonname1,pokemonname2,pokemonname3,pokemonname4,pokemonname5)
+      db.results_as_hash = true
       session[:currentteam_ids] = []
       flash[:success] = "Team added"
       redirect('/teambuilder')
