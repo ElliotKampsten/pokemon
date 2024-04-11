@@ -187,6 +187,7 @@ post('/teams/teamaddcalc') do
     redirect("/teams/create")
 
   else
+      db.results_as_hash = false
       teamname = params[:enteredteamname]
       pokemonname1 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][0]).first
       pokemonname2 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][1]).first
@@ -194,8 +195,9 @@ post('/teams/teamaddcalc') do
       pokemonname4 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][3]).first
       pokemonname5 = db.execute('SELECT Name FROM Pokemon WHERE id == ?',session[:currentteam_ids][4]).first
      
-      db.results_as_hash = false
       db.execute('INSERT INTO Teams (Name,Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5) VALUES (?,?,?,?,?,?)',teamname,pokemonname1,pokemonname2,pokemonname3,pokemonname4,pokemonname5)
+      teamid = db.execute('SELECT id FROM Teams WHERE Name == ? AND Pokemon1 == ? AND Pokemon2 == ? AND Pokemon3 == ? AND Pokemon4 == ? AND Pokemon5 == ?',teamname,pokemonname1,pokemonname2,pokemonname3,pokemonname4,pokemonname5)
+      db.execute('INSERT INTO User_Team (user_id,team_id) VALUES (?,?)',session[:id],teamid)
       db.results_as_hash = true
       session[:currentteam_ids] = []
       flash[:success] = "Team added"
@@ -204,11 +206,36 @@ post('/teams/teamaddcalc') do
   
 end
 
+post('/teamremovecalc') do
+    nummer = params[:number].to_i
+    db = SQLite3::Database.new('db/pokemon.db')
+    db.results_as_hash = true
+    db.execute('DELETE FROM User_Team WHERE user_id == ? AND team_id == ?',session[:id],nummer)
+    db.execute('DELETE FROM Teams WHERE id == ?',nummer)
+    redirect('/teambuilder')
+end
+
+post('/teameditcalc') do
+  nummer = params[:number].to_i
+  session[:currentteam_ids] = []
+  db = SQLite3::Database.new('db/pokemon.db')
+  pokemonsinteam = db.execute('SELECT Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5 FROM Teams WHERE id == ?',nummer).first
+  db.execute('DELETE FROM User_Team WHERE user_id == ? AND team_id == ?',session[:id],nummer)
+  db.execute('DELETE FROM Teams WHERE id == ?',nummer)
+  pokemonsinteam.each do |name| 
+    currentpokemonid = db.execute('SELECT id FROM Pokemon WHERE Name == ?',name)
+    session[:currentteam_ids] << currentpokemonid
+  end
+  flash[:success] = "#{session[:currentteam_ids]}"
+  redirect('teams/create')
+end
+
 post('/teams/removehandler') do
     nummer = params[:number].to_i
     session[:currentteam_ids].delete_at(nummer)
     redirect('/teams/create')
 end
+
 
 post('/users/logincalc') do
     username= params[:username]

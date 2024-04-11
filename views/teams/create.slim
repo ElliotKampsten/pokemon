@@ -1,7 +1,6 @@
 -require 'sqlite3'
 - db = SQLite3::Database.new('db/pokemon.db')
 - db.results_as_hash = true
-h1 team creator
 div id="creatediv"
   - if session[:currentteam_ids].count() < 5
     h1 id="createtext" Enter the name of the gen 1 pokemon you would like to add to your current team!
@@ -17,7 +16,8 @@ div id="creatediv"
        input id="addpokemonbar" type="text"  name="enteredteamname" placeholder="Enter a team name"
     - if session[:currentteam_ids].count() < 5
         button type="submit" name="action" value="add" Add
-    button type="submit" name="action" value="complete" Complete
+    -else
+        button type="submit" name="action" value="complete" Complete
 
   h1 Current Team: 
   div id="currentteamdiv"

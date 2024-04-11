@@ -1,6 +1,5 @@
-h1 teambuilder index 
+ 
 - db = SQLite3::Database.new('db/pokemon.db')
-- db.results_as_hash = true
 - usermons = db.execute('SELECT * FROM User_Pokemon WHERE User_id == ?',session[:id])
 - if usermons.count() < 5
     -redirect('teambuildcheathandler')
@@ -13,7 +12,25 @@ div class="builderheader"
 
 h1 Teams:
 div id="teamgrid"
-    - #db.execute('SELECT * FROM ')
+    -if (db.execute('SELECT * FROM User_Team WHERE user_id == ?',session[:id])) != nil
+        - (db.execute('SELECT * FROM User_Team WHERE user_id == ?',session[:id])).each_with_index do |currentteam,index|
+            -teamname = db.execute('SELECT Name FROM Teams WHERE id == ?',currentteam[1]).first[0]
+            -pokemonsinteam = db.execute('SELECT Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5 FROM Teams WHERE id == ?',currentteam[1]).first
+            h1 id="teamname" #{teamname}
+            form action="teamremovecalc" method="POST"
+                button name="number" type="submit" value=currentteam[1] Remove
+            form action="teameditcalc" method="POST"
+                button name="number" type="submit" value=currentteam[1] Edit 
+            div id="currentteamdiv"
+                -pokemonsinteam.each_with_index do |currentname,index|
+                    -currenttype = db.execute('SELECT Type1 FROM Pokemon WHERE Name == ?',currentname).first
+                    - bgcrgb = [123,0,123]
+                    div style="background-color: rgb(#{bgcrgb[0]},#{bgcrgb[1]},#{bgcrgb[2]}); width:100px; height:100px;" class="pokemondiv"
+                        p #{currentname}
+    end 
+                
+    
+            
 
 
 
