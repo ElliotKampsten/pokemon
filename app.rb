@@ -7,6 +7,12 @@ require 'sinatra/flash'
 
 enable :sessions
 
+before do 
+  if !session[:id] and request.path_info != '/' and request.path_info != '/users/register' and request.path_info != '/users/login' and request.path_info != '/users/logincalc' and request.path_info != '/users/store'
+    redirect('/')
+  end
+end
+
 get('/') do
     slim(:start)
 end
@@ -29,8 +35,8 @@ get('/fel') do
     slim(:fel)
 end
 
-get('/pokemons/create') do
-  slim(:"pokemons/create")
+get('/pokemons/new') do
+  slim(:"pokemons/new")
 end
 
 post('/users/store') do
@@ -51,7 +57,6 @@ post('/users/store') do
   
     else
         "Lösenorden matchade inte!"
-        #redirect to register?
     end
 
   end
@@ -64,11 +69,11 @@ get('/pokemons/remove') do
   slim(:"pokemons/remove")
 end
 
-get('/pokemons') do
+get('/pokemons/') do
   slim(:"pokemons/index")
 end
 
-post('/pokemons/pokemonaddcalc') do
+post('/pokemons') do
 
   
 
@@ -80,7 +85,7 @@ post('/pokemons/pokemonaddcalc') do
   if !db.execute('SELECT * FROM Pokemon WHERE Name == ?',enteredpokemon).first
     #pokemon was misspelled or invalid
     flash[:error] = "Pokemon was misspelled or is invalid"
-    redirect("/pokemons/create")
+    redirect("/pokemons/new")
   end
 
   pokemon_id = db.execute('SELECT * FROM Pokemon WHERE Name == ?', enteredpokemon).first["id"]
@@ -91,14 +96,14 @@ post('/pokemons/pokemonaddcalc') do
     #Does not exist already in users pokdex, the rel-table is empty, add pokemon
     db.execute("INSERT INTO User_Pokemon (User_id,Pokemon_id) VALUES (?,?)",user_id,pokemon_id)
     flash[:success] = "Pokemon was successfully added to your pokedex!"
-    redirect("/pokemons/create")
+    redirect("/pokemons/new")
   else
     flash[:error] = "Pokemon already exists in your pokedex!"
-    redirect("/pokemons/create")
+    redirect("/pokemons/new")
   end
 end
 
-post('/pokemons/pokemonremovecalc') do
+post('/pokemons/delete') do
 
   #MÅSTE FIXA REDIRECT FÖR NÄR MAN REDAN HAR POKEMONEN
 
@@ -150,15 +155,15 @@ get('/admons') do
   end
 end
 
-get('/teambuilder') do
+get('/teams/') do
   slim(:"teams/index")
 end
 
-get('/teams/create') do
-  slim(:"teams/create")
+get('/teams/new') do
+  slim(:"teams/new")
 end
 
-post('/teams/teamaddcalc') do
+post('/teams') do
   db = SQLite3::Database.new('db/pokemon.db')
   db.results_as_hash = true
   if params[:action] == "add"
@@ -166,7 +171,7 @@ post('/teams/teamaddcalc') do
     if !db.execute('SELECT * FROM Pokemon WHERE Name == ?',enteredpokemon).first
       #pokemon was misspelled or invalid
       flash[:error] = "Pokemon was misspelled or is invalid"
-      redirect("/teams/create")
+      redirect("/teams/new")
     end
 
     pokemon_id = db.execute('SELECT * FROM Pokemon WHERE Name == ?', enteredpokemon).first["id"]
@@ -176,7 +181,7 @@ post('/teams/teamaddcalc') do
     if db.execute('SELECT * FROM User_Pokemon WHERE User_id == ? AND Pokemon_id == ?',user_id,pokemon_id).first == nil
       #Does not exist in users pokdex, warn
       flash[:error] = "Pokemon does not exist in your pokedex!"
-      redirect("/teams/create")
+      redirect("/teams/new")
     end
 
   
@@ -184,7 +189,7 @@ post('/teams/teamaddcalc') do
     session[:currentteam_ids] << pokemon_id
 
     flash[:success] = "Pokemon was added to current team"
-    redirect("/teams/create")
+    redirect("/teams/new")
 
   else
       db.results_as_hash = false
@@ -201,21 +206,21 @@ post('/teams/teamaddcalc') do
       db.results_as_hash = true
       session[:currentteam_ids] = []
       flash[:success] = "Team added"
-      redirect('/teambuilder')
+      redirect('/teams/')
   end
   
 end
 
-post('/teamremovecalc') do
+post('/teams/delete') do
     nummer = params[:number].to_i
     db = SQLite3::Database.new('db/pokemon.db')
     db.results_as_hash = true
     db.execute('DELETE FROM User_Team WHERE user_id == ? AND team_id == ?',session[:id],nummer)
     db.execute('DELETE FROM Teams WHERE id == ?',nummer)
-    redirect('/teambuilder')
+    redirect('/teams/')
 end
 
-post('/teameditcalc') do
+post('/teams/update') do
   nummer = params[:number].to_i
   session[:currentteam_ids] = []
   db = SQLite3::Database.new('db/pokemon.db')
@@ -226,14 +231,13 @@ post('/teameditcalc') do
     currentpokemonid = db.execute('SELECT id FROM Pokemon WHERE Name == ?',name)
     session[:currentteam_ids] << currentpokemonid
   end
-  flash[:success] = "#{session[:currentteam_ids]}"
-  redirect('teams/create')
+  redirect('teams/new')
 end
 
 post('/teams/removehandler') do
     nummer = params[:number].to_i
     session[:currentteam_ids].delete_at(nummer)
-    redirect('/teams/create')
+    redirect('/teams/new')
 end
 
 
@@ -267,6 +271,7 @@ post('/users/logincalc') do
       session[:name] = name
       redirect('/home')
     else
-      #redirect('/fel') - fixa felsida
+      flash[:error] = "User does not exist or information was spelled incorrectly"
+      redirect('/')
     end
   end

@@ -7,7 +7,7 @@ end
 
 div class="builderheader"
     div class="navbutton" id="buildheadbutton"
-        a class="navlink" href="/teams/create" Create Team 
+        a class="navlink" href="/teams/new" Create Team 
 
 
 h1 Teams:
@@ -17,9 +17,9 @@ div id="teamgrid"
             -teamname = db.execute('SELECT Name FROM Teams WHERE id == ?',currentteam[1]).first[0]
             -pokemonsinteam = db.execute('SELECT Pokemon1,Pokemon2,Pokemon3,Pokemon4,Pokemon5 FROM Teams WHERE id == ?',currentteam[1]).first
             h1 id="teamname" #{teamname}
-            form action="teamremovecalc" method="POST"
+            form action="delete" method="POST"
                 button name="number" type="submit" value=currentteam[1] Remove
-            form action="teameditcalc" method="POST"
+            form action="/teams/update" method="POST"
                 button name="number" type="submit" value=currentteam[1] Edit 
             div id="currentteamdiv"
                 -pokemonsinteam.each_with_index do |currentname,index|
