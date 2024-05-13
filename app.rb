@@ -13,6 +13,15 @@ before do
   end
 end
 
+before('/admons') do
+  if session[:is_admin] == false and !session[:id]
+    redirect('/')
+  end
+  if session[:is_admin] == false
+    redirect('/home')
+  end
+end
+
 get('/') do
     slim(:start)
 end
